@@ -240,13 +240,14 @@ pip install ddtrace openai pandas packaging
 ````
 
 ### **Set Environment Variables**
+```bash
 export DD_API_KEY="<your_datadog_api_key>"
 export DD_APP_KEY="<your_datadog_app_key>"
 export DD_SITE="datadoghq.com"       # or datadoghq.eu
 export OPENAI_API_KEY="<your_openai_api_key>"
 export OPENAI_MODEL="gpt-4o-mini"
 export DATASET_CSV="Citizen_Eligibility_Demo_Dataset_with_Metadata.csv"  # optional
-
+````
 
 ### **▶️ Run the Demo**
 ```bash
@@ -272,9 +273,7 @@ https://app.datadoghq.com/llm-observability/projects/Rick-Project/experiments/ci
 The printed URL opens your Experiment Dashboard, where you can:
 
 - Inspect prompt → response → evaluation traces
-
 - Filter by service, env, version, or ddtrace.version
-
 - Compare experiments (e.g., model version or temperature change)
 
 ### **🧾 Notes**
