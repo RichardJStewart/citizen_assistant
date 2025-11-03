@@ -12,7 +12,7 @@ The demo showcases:
 - ✅ Custom evaluators for accuracy, compliance, and latency
 - ✅ Datadog tagging and trace correlation
 
-# 🏛️ Citizen Services Virtual Assistant Chat App (FastAPI + Datadog LLM Observability)
+## 🏛️ Citizen Services Virtual Assistant Chat App (FastAPI + Datadog LLM Observability)
 
 A minimal, production-ish chatbot that answers federal **benefits & eligibility** questions using **OpenAI** and streams **observability** to **Datadog** via `ddtrace` + **LLM Observability (LLMObs)**.
 
@@ -229,13 +229,7 @@ OPENAI_MODEL=gpt-4o-mini
 
 Load `.env` with your shell or a tool like `direnv`; the script itself reads from `os.getenv`.
 
-
-
-```
-```
-
-
-
+## 🏛️ Creating Experiments for the Citizen Services Virtual Assistant
 ---
 
 ## ⚙️ Setup
