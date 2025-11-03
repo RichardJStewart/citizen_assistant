@@ -18,6 +18,7 @@ The demo showcases:
 ### **Install requirements**
 ```bash
 pip install ddtrace openai pandas packaging
+````
 
 ### **Set Environment Variables**
 export DD_API_KEY="<your_datadog_api_key>"
@@ -27,8 +28,11 @@ export OPENAI_API_KEY="<your_openai_api_key>"
 export OPENAI_MODEL="gpt-4o-mini"
 export DATASET_CSV="Citizen_Eligibility_Demo_Dataset_with_Metadata.csv"  # optional
 
+
 ### **▶️ Run the Demo**
+```bash
 python3 citizen_assistant_experiment.py
+````
 
 ### **Example Output**
 ✅ Detected ddtrace version: 2.8.4
