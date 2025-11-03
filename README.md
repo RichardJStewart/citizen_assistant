@@ -12,7 +12,6 @@ The demo showcases:
 - ✅ Custom evaluators for accuracy, compliance, and latency
 - ✅ Datadog tagging and trace correlation
 
-````markdown
 # 🏛️ Citizen Services Virtual Assistant Chat App (FastAPI + Datadog LLM Observability)
 
 A minimal, production-ish chatbot that answers federal **benefits & eligibility** questions using **OpenAI** and streams **observability** to **Datadog** via `ddtrace` + **LLM Observability (LLMObs)**.
