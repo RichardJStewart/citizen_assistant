@@ -61,3 +61,156 @@ The printed URL opens your Experiment Dashboard, where you can:
 - Recommended max_tokens: 300 for GPT-4o-mini
 - Project tags: "source": "llm-observability", "ml_app": "citizen-assistant-chat"
 
+---
+
+````markdown
+## 🐍 Python Installation & Environment Setup
+
+These demo scripts require **Python 3.9 or newer** (recommended: **Python 3.11+**).  
+Follow the steps below to install Python and configure your environment on macOS or Linux.
+
+---
+
+### 1️⃣ Verify if Python is installed
+```bash
+python3 --version
+````
+
+You should see output like:
+
+```
+Python 3.11.6
+```
+
+If the command is not found or the version is below 3.9, proceed to install Python.
+
+---
+
+### 2️⃣ Install Python (macOS)
+
+**Option A — via Homebrew (recommended):**
+
+```bash
+brew install python
+```
+
+**Option B — from python.org:**
+
+1. Visit [https://www.python.org/downloads/](https://www.python.org/downloads/)
+2. Download the latest **macOS installer**
+3. Run it and ensure **“Add Python to PATH”** is selected
+
+---
+
+### 3️⃣ Verify installation
+
+After installation, confirm it’s accessible:
+
+```bash
+python3 --version
+pip3 --version
+```
+
+Both should return valid version numbers.
+
+---
+
+### 4️⃣ Create a virtual environment
+
+It’s best practice to isolate dependencies for this demo:
+
+```bash
+python3 -m venv venv
+```
+
+Activate it:
+
+```bash
+source venv/bin/activate
+```
+
+You should see `(venv)` in your terminal prompt.
+
+---
+
+### 5️⃣ Upgrade pip and install dependencies
+
+```bash
+pip install --upgrade pip
+pip install ddtrace openai pandas packaging
+```
+
+If you’re working with datasets that use YAML metadata:
+
+```bash
+pip install pyyaml
+```
+
+---
+
+### 6️⃣ (Optional) Save dependencies for reproducibility
+
+```bash
+pip freeze > requirements.txt
+```
+
+You can later re-install them in one line:
+
+```bash
+pip install -r requirements.txt
+```
+
+---
+
+### 7️⃣ Run your demo script
+
+Once the environment is ready:
+
+```bash
+python3 citizen_assistant_experiment.py
+```
+
+If you see a message like:
+
+```
+✅ Detected ddtrace version: 2.8.4
+✅ LLMObs module is available.
+```
+
+you’re good to go.
+
+---
+
+### 8️⃣ Deactivate the environment (when finished)
+
+```bash
+deactivate
+```
+
+---
+
+### 🧠 Quick Reference
+
+| Command                    | Purpose                      |
+| -------------------------- | ---------------------------- |
+| `python3 -m venv venv`     | Create isolated environment  |
+| `source venv/bin/activate` | Activate environment         |
+| `pip install ...`          | Install dependencies         |
+| `deactivate`               | Exit environment             |
+| `python3 scriptname.py`    | Run your Datadog demo script |
+
+---
+
+**💡 Tip:**
+If you ever upgrade Python, recreate your `venv` — virtual environments are version-specific.
+
+---
+
+✅ Once complete, your environment is ready to run:
+
+* `citizen_assistant_experiment.py`
+* `add_metadata_block.py`
+* Any other Datadog LLM Observability scripts
+
+
+
