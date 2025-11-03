@@ -63,7 +63,6 @@ The printed URL opens your Experiment Dashboard, where you can:
 
 ---
 
-````markdown
 ## 🐍 Python Installation & Environment Setup
 
 These demo scripts require **Python 3.9 or newer** (recommended: **Python 3.11+**).  
