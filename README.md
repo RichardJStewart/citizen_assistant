@@ -37,30 +37,27 @@ Experiment complete. View results here:
 https://app.datadoghq.com/llm-observability/projects/Rick-Project/experiments/citizen_assistant_openai_v1
 
 
-🧩 Experiment Components
-Component	Description
-Environment Check	Confirms compatible ddtrace + LLMObs install
-Dataset	Eligibility prompts & expected outputs
-Agent	GPT-4o-mini responding to citizen inquiries
-Evaluators	exact_match_ci, policy_reference_present, pii_guard, latency_under_2s
-Tags	service=citizen-assistant, env=demo, version=v1.3, ddtrace.version, model_provider=openai
-📊 View in Datadog
+### **🧩 Experiment Components**
+- Environment Check	Confirms compatible ddtrace + LLMObs install
+- Dataset	Eligibility prompts & expected outputs
+- Agent	GPT-4o-mini responding to citizen inquiries
+- Evaluators	exact_match_ci, policy_reference_present, pii_guard, latency_under_2s
+- Tags	service=citizen-assistant, env=demo, version=v1.3, ddtrace.version, model_provider=openai
+
+### **📊 View in Datadog**
 
 The printed URL opens your Experiment Dashboard, where you can:
 
-Inspect prompt → response → evaluation traces
+- Inspect prompt → response → evaluation traces
 
-Filter by service, env, version, or ddtrace.version
+- Filter by service, env, version, or ddtrace.version
 
-Compare experiments (e.g., model version or temperature change)
+- Compare experiments (e.g., model version or temperature change)
 
-🧾 Notes
+### **🧾 Notes**
 
-Uses synthetic, non-PII data for demo safety
-
-Recommended ddtrace version: ≥ 2.8.0
-
-Recommended max_tokens: 300 for GPT-4o-mini
-
-Project tags: "source": "llm-observability", "ml_app": "citizen-assistant-chat"
+- Uses synthetic, non-PII data for demo safety
+- Recommended ddtrace version: ≥ 2.8.0
+- Recommended max_tokens: 300 for GPT-4o-mini
+- Project tags: "source": "llm-observability", "ml_app": "citizen-assistant-chat"
 
