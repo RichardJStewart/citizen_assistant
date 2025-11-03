@@ -68,8 +68,6 @@ The printed URL opens your Experiment Dashboard, where you can:
 These demo scripts require **Python 3.9 or newer** (recommended: **Python 3.11+**).  
 Follow the steps below to install Python and configure your environment on macOS or Linux.
 
----
-
 ### 1️⃣ Verify if Python is installed
 ```bash
 python3 --version
