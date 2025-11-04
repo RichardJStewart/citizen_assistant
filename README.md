@@ -459,7 +459,7 @@ It reads from an `inputs.txt` file containing example citizen-style questions an
   - `grep`
   - `shuf`
 - A running web service on **`localhost:8000`** with a POST `/chat` endpoint that accepts:
-  ```json
+```json
   { "message": "Your text here" }
 ````
 
