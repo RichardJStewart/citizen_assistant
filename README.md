@@ -433,10 +433,123 @@ If you ever upgrade Python, recreate your `venv` — virtual environments are ve
 
 ---
 
+## Citizen Chat Message Poster Utility (Generate traffic)
+
+A simple shell utility that sends random sample messages to a **Citizen Assistant** chat service running locally on `http://localhost:8000/chat`.
+
+It reads from an `inputs.txt` file containing example citizen-style questions and posts one at a time, every minute, using `curl`.
+
+---
+
+### 🧩 Features
+
+- Posts random messages from a text file (`inputs.txt`)
+- Sends JSON payloads to a configurable endpoint
+- Runs indefinitely until stopped
+- Uses only standard Unix tools (`bash`, `curl`, `grep`, `shuf`, `sed`)
+- Works on macOS or Linux
+
+---
+
+### ⚙️ Requirements
+
+- macOS or Linux with:
+  - `bash`
+  - `curl`
+  - `grep`
+  - `shuf`
+- A running web service on **`localhost:8000`** with a POST `/chat` endpoint that accepts:
+```json
+  { "message": "Your text here" }
+````
+
+---
+
+### 🧰 Installation
+
+1. Clone or copy this repository.
+2. Ensure both of these files are in the same folder:
+
+   * `citizen_poster.sh`
+   * `inputs.txt`
+3. Make the script executable:
+
+   ```bash
+   chmod +x citizen_poster.sh
+   ```
+
+---
+
+### 🚀 Usage
+
+Run the script directly:
+
+```bash
+./citizen_poster.sh
+```
+
+It will:
+
+* Choose a random line from `inputs.txt`
+* Send it as JSON to `http://localhost:8000/chat`
+* Wait 60 seconds, then repeat
+
+---
+
+### 🧾 Example `inputs.txt`
+
+Each line represents one sample citizen query:
+
+```
+How do I renew my driver's license?
+Where can I register to vote?
+What is the process for applying for a passport?
+How do I report a pothole in my neighborhood?
+```
+
+You can customize the file with any text you like — the script picks randomly each time.
+
+---
+
+### 🔧 Configuration
+
+Open `citizen_poster.sh` and adjust the following variables at the top if needed:
+
+```bash
+INPUT_FILE="inputs.txt"          # Path to input file
+URL="http://localhost:8000/chat" # API endpoint
+INTERVAL=60                      # Seconds between messages
+```
+
+---
+
+### 🧪 Example Output
+
+```
+[INFO] Posting random messages to http://localhost:8000/chat every 60 seconds
+2025-11-04 10:12:00 -> Sent: How do I apply for a passport?
+2025-11-04 10:13:00 -> Sent: Where can I pay a parking ticket?
+```
+
+---
+
+### 🛑 Stopping the Script
+
+Press **Ctrl + C** in the terminal to stop it gracefully.
+
+---
+
+### 🧠 Notes
+
+* This script is for **local testing only**.
+  It should **not** be used to send automated traffic to any real government or public service endpoints.
+* The JSON payload and endpoint can be changed easily for other local APIs or development servers.
+
+---
+
 ## ⚖️ License & Notice
 
 * Demo code for **educational & demonstration** purposes (no PII in prompts).
 * You are responsible for complying with your org’s security, privacy, and AI governance policies.
 
----
 
