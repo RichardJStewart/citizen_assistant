@@ -433,8 +433,7 @@ If you ever upgrade Python, recreate your `venv` — virtual environments are ve
 
 ---
 
-````markdown
-# Citizen Chat Message Poster
+## Citizen Chat Message Poster Utility (Generate traffic)
 
 A simple shell utility that sends random sample messages to a **Citizen Assistant** chat service running locally on `http://localhost:8000/chat`.
 
@@ -442,7 +441,7 @@ It reads from an `inputs.txt` file containing example citizen-style questions an
 
 ---
 
-## 🧩 Features
+### 🧩 Features
 
 - Posts random messages from a text file (`inputs.txt`)
 - Sends JSON payloads to a configurable endpoint
@@ -452,7 +451,7 @@ It reads from an `inputs.txt` file containing example citizen-style questions an
 
 ---
 
-## ⚙️ Requirements
+### ⚙️ Requirements
 
 - macOS or Linux with:
   - `bash`
@@ -466,7 +465,7 @@ It reads from an `inputs.txt` file containing example citizen-style questions an
 
 ---
 
-## 🧰 Installation
+### 🧰 Installation
 
 1. Clone or copy this repository.
 2. Ensure both of these files are in the same folder:
@@ -481,7 +480,7 @@ It reads from an `inputs.txt` file containing example citizen-style questions an
 
 ---
 
-## 🚀 Usage
+### 🚀 Usage
 
 Run the script directly:
 
@@ -497,7 +496,7 @@ It will:
 
 ---
 
-## 🧾 Example `inputs.txt`
+### 🧾 Example `inputs.txt`
 
 Each line represents one sample citizen query:
 
@@ -512,7 +511,7 @@ You can customize the file with any text you like — the script picks randomly 
 
 ---
 
-## 🔧 Configuration
+### 🔧 Configuration
 
 Open `citizen_poster.sh` and adjust the following variables at the top if needed:
 
@@ -524,7 +523,7 @@ INTERVAL=60                      # Seconds between messages
 
 ---
 
-## 🧪 Example Output
+### 🧪 Example Output
 
 ```
 [INFO] Posting random messages to http://localhost:8000/chat every 60 seconds
@@ -534,13 +533,13 @@ INTERVAL=60                      # Seconds between messages
 
 ---
 
-## 🛑 Stopping the Script
+### 🛑 Stopping the Script
 
 Press **Ctrl + C** in the terminal to stop it gracefully.
 
 ---
 
-## 🧠 Notes
+### 🧠 Notes
 
 * This script is for **local testing only**.
   It should **not** be used to send automated traffic to any real government or public service endpoints.
@@ -553,5 +552,4 @@ Press **Ctrl + C** in the terminal to stop it gracefully.
 * Demo code for **educational & demonstration** purposes (no PII in prompts).
 * You are responsible for complying with your org’s security, privacy, and AI governance policies.
 
----
 
