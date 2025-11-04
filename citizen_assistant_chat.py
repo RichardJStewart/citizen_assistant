@@ -39,6 +39,45 @@ LLMObs.enable(
     api_key=DD_API_KEY,
     app_key=DD_APP_KEY,
 )
+# ---------- Topic + Policy + Retrieval helpers ----------
+
+FEDERAL_TOPICS = {
+    "Passports & Travel Documents": ["passport", "state department", "ds-11", "ds-82"],
+    "Taxes & IRS Services": ["irs", "tax refund", "income tax", "1040"],
+    "Social Security & Benefits": ["ssa", "social security", "ssdi", "ssi"],
+    "Medicare & Health Programs": ["medicare", "cms", "part a", "part b", "part d"],
+    "Unemployment Insurance (Federal Programs)": ["dol", "federal unemployment", "pua"],
+    "Immigration & Citizenship": ["uscis", "citizenship", "naturalization", "green card", "visa"],
+    "Veterans Affairs": ["va", "veterans", "gi bill", "va healthcare"],
+    "Military & Defense": ["dod", "pentagon", "enlist", "army", "navy", "air force", "marines", "space force"],
+    "Small Business & Economic Development": ["sba", "federal loan", "lender match"],
+    "Environmental Protection & Energy": ["epa", "environmental violation", "clean air", "clean water"],
+    "Disaster Relief & Emergency Management": ["fema", "disaster assistance", "declaration"],
+    "Transportation & Travel Safety": ["tsa", "precheck", "global entry", "faa"],
+    "Housing & Urban Development": ["hud", "fair housing", "fheo", "fha"],
+    "Census & Federal Data": ["census", "data.census.gov"],
+    "Voting & Elections (Federal)": ["federal election", "vote.gov", "absentee (federal)"],
+}
+
+def detect_topic(text: str) -> str:
+    t = text.lower()
+    for topic, kws in FEDERAL_TOPICS.items():
+        if any(k in t for k in kws):
+            return topic
+    return "General Federal Inquiry"
+
+def policy_check(message: str) -> dict:
+    """Very basic moderation stub for demo; extend with your real checks."""
+    flagged = contains_pii(message) or any(bad in message.lower() for bad in ["bomb", "attack"])
+    return {"flagged": flagged, "reason": "pii_or_disallowed" if flagged else "ok"}
+
+def retrieve_docs(query: str) -> list[str]:
+    """Stub: simulate retrieval latency and return fake IDs when relevant."""
+    time.sleep(0.02)
+    q = query.lower()
+    if "passport" in q: return ["faq_passport_renewal", "link_state_dept_ds82"]
+    if "irs" in q or "tax" in q: return ["faq_irs_refund", "link_wmr_tool"]
+    return []
 
 # Prepare OpenAI client
 openai_client = OpenAI(api_key=OPENAI_API_KEY)
@@ -212,7 +251,6 @@ def home():
 def chat(req: ChatRequest, request: Request):
     user_msg = (req.message or "").strip()
 
-    # Basic input validation & safety
     if not user_msg:
         raise HTTPException(status_code=400, detail="Empty message.")
     if contains_pii(user_msg):
@@ -221,67 +259,90 @@ def chat(req: ChatRequest, request: Request):
             content={"error": "Your message appears to contain PII. Please remove sensitive information and try again."},
         )
 
-    # Start a root span for the chat request (Datadog APM)
-    with tracer.trace("chat.request", service="citizen-assistant", resource="/chat") as span:
-        span.set_tag("app.user_agent", request.headers.get("user-agent", "unknown"))
-        span.set_tag("ml.app", "citizen-assistant-chat")
-        span.set_tag("ml.provider", "openai")
-        span.set_tag("ml.model", OPENAI_MODEL)
-        span.set_tag("ml.session_id", req.session_id or "anonymous")
-        span.set_tag("ml.temperature", req.temperature)
-        span.set_tag("ml.max_tokens", req.max_tokens)
+    # Root span (kept the same name so existing dashboards continue to work)
+    with tracer.trace("chat.request", service="citizen-assistant", resource="/chat") as root:
+        # High-level request metadata
+        root.set_tag("app.user_agent", request.headers.get("user-agent", "unknown"))
+        root.set_tag("ml.app", "citizen-assistant-chat")
+        root.set_tag("ml.provider", "openai")
+        root.set_tag("ml.model", OPENAI_MODEL)
+        root.set_tag("ml.session_id", req.session_id or "anonymous")
+        root.set_tag("ml.temperature", req.temperature)
+        root.set_tag("ml.max_tokens", req.max_tokens)
+        root.set_tag("ml.prompt_preview", user_msg[:200])
 
-        # LLM call span — captured as a child of chat.request
-        start = time.time()
-        try:
-            # Optional: log input as an attribute for observability (avoid PII)
-            span.set_tag("ml.prompt_preview", user_msg[:200])
-            span.set_tag("ml.topic", detect_topic(user_msg))
+        # --- user interaction (top of the funnel) ---
+        with tracer.trace("citizen.user_interaction") as ui:
+            ui.set_tag("route", "/chat")
+            ui.set_metric("message.length", len(user_msg))
 
-            # --- OpenAI call ---
-            completion = openai_client.chat.completions.create(
-                model=OPENAI_MODEL,
-                messages=[
-                    {"role": "system", "content": SYSTEM_PROMPT},
-                    {"role": "user", "content": user_msg}
-                ],
-                temperature=req.temperature or 0.2,
-                max_tokens=req.max_tokens or 300,
-            )
-            latency_s = time.time() - start
-            text = completion.choices[0].message.content if completion and completion.choices else ""
+            # topic classification early so it’s queryable on all child spans
+            topic = detect_topic(user_msg)
+            ui.set_tag("ml.topic", topic)
+            root.set_tag("ml.topic", topic)  # duplicate on root for easy filtering
 
-            # Safety check on output
-            if contains_pii(text):
-                text = ("I can’t share or process personal identifiers. "
-                        "Please use official portals for sensitive data and avoid entering PII here.")
+            # --- policy evaluation ---
+            with tracer.trace("citizen.policy_evaluation") as pol:
+                pol.set_tag("policy.engine", "demo_local_v1")
+                polres = policy_check(user_msg)
+                pol.set_tag("policy.flagged", polres["flagged"])
+                pol.set_tag("policy.reason", polres["reason"])
+                if polres["flagged"]:
+                    raise HTTPException(status_code=400, detail="Message violates policy or contains PII.")
 
-            # Annotate span with result metadata
-            span.set_tag("ml.latency_s", round(latency_s, 4))
-            span.set_tag("ml.output_preview", text[:200])
+            # --- retrieval (RAG or FAQ lookup) ---
+            with tracer.trace("citizen.retrieval.query") as ret:
+                ret.set_tag("source", "federal_faq_index")
+                docs = retrieve_docs(user_msg)
+                ret.set_metric("retrieved_docs", len(docs))
+                if docs:
+                    ret.set_tag("docs.ids", ",".join(docs[:5]))
 
-            # (Optional) LLM Observability: send an interaction record.
-            # Some versions of ddtrace.llmobs auto-ingest spans; this explicit block keeps the demo obvious.
-            # If your version exposes helpers like LLMObs.record(...), you can wire them here.
+            # --- LLM call (OpenAI) ---
+            with tracer.trace("citizen.llm.completion") as llm_span:
+                llm_span.set_tag("model.name", OPENAI_MODEL)
+                llm_span.set_metric("prompt.length", len(user_msg))
+                start = time.time()
+                try:
+                    completion = openai_client.chat.completions.create(
+                        model=OPENAI_MODEL,
+                        messages=[
+                            {"role": "system", "content": SYSTEM_PROMPT},
+                            {"role": "user", "content": user_msg},
+                        ],
+                        temperature=req.temperature or 0.2,
+                        max_tokens=req.max_tokens or 300,
+                    )
+                    latency_s = time.time() - start
+                    text = completion.choices[0].message.content if completion and completion.choices else ""
+                    llm_span.set_metric("ml.latency_s", round(latency_s, 4))
+                    if hasattr(completion, "usage") and completion.usage:
+                        # OpenAI Python v1 returns usage on responses; guard just in case
+                        llm_span.set_metric("tokens.prompt", getattr(completion.usage, "prompt_tokens", 0) or 0)
+                        llm_span.set_metric("tokens.completion", getattr(completion.usage, "completion_tokens", 0) or 0)
+                        llm_span.set_metric("tokens.total", getattr(completion.usage, "total_tokens", 0) or 0)
+                except Exception as e:
+                    llm_span.set_tag("error", True)
+                    llm_span.set_tag("error.msg", str(e))
+                    raise HTTPException(status_code=500, detail=f"LLM error: {e}")
+
+            # --- response assembly (post-process + light safety) ---
+            with tracer.trace("citizen.response.assembly") as asm:
+                # basic blend of model result + any retrieved items
+                if contains_pii(text):
+                    text = ("I can’t share or process personal identifiers. "
+                            "Please use official portals for sensitive data and avoid entering PII here.")
+                if docs:
+                    text = f"{text}\n\nReferences (suggested): " + ", ".join(docs)
+                asm.set_metric("reply.length", len(text))
+                asm.set_tag("reply.preview", text[:200])
+
+            # annotate root with final preview for quick triage
+            root.set_tag("ml.output_preview", text[:200])
+
+            # Optional: if your ddtrace/LLMObs version supports explicit recording, you could send it here.
+            # LLMObs may auto-ingest spans; keeping this explicit call commented avoids version coupling.
+            # LLMObs.record_interaction(input=user_msg, output=text, metadata={"topic": topic})
 
             return {"response": text}
 
-        except Exception as e:
-            span.set_tag("error", True)
-            span.set_tag("error.msg", str(e))
-            raise HTTPException(status_code=500, detail=f"LLM error: {e}")
-
-def detect_topic(prompt: str) -> str:
-    prompt_lower = prompt.lower()
-    if "housing" in prompt_lower or "hud" in prompt_lower:
-        return "Housing Assistance"
-    elif "snap" in prompt_lower or "food" in prompt_lower:
-        return "Food Assistance"
-    elif "medicaid" in prompt_lower or "health" in prompt_lower:
-        return "Healthcare Assistance"
-    elif "veteran" in prompt_lower or "army" in prompt_lower or "navy" in prompt_lower:
-        return "Veterans Benefits"
-    elif "military" in prompt_lower:
-        return "Veterans Benefits"
-    else:
-        return "General Inquiry"
