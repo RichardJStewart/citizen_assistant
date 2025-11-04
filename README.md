@@ -255,11 +255,12 @@ python3 citizen_assistant_experiment.py
 ````
 
 ### **Example Output**
-✅ Detected ddtrace version: 2.8.4
-✅ LLMObs module is available.
+- ✅ Detected ddtrace version: 2.8.4
+- ✅ LLMObs module is available.
+```bash
 Experiment complete. View results here:
 https://app.datadoghq.com/llm-observability/projects/Rick-Project/experiments/citizen_assistant_openai_v1
-
+````
 
 ### **🧩 Experiment Components**
 - Environment Check	Confirms compatible ddtrace + LLMObs install
