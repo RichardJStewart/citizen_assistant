@@ -10,6 +10,7 @@ from pydantic import BaseModel
 # --- Datadog / ddtrace ---
 from ddtrace import tracer, patch_all
 from ddtrace.llmobs import LLMObs
+from ddtrace.llmobs.decorators import workflow, task, agent
 
 # --- LLM client (OpenAI) ---
 from openai import OpenAI
@@ -59,6 +60,7 @@ FEDERAL_TOPICS = {
     "Voting & Elections (Federal)": ["federal election", "vote.gov", "absentee (federal)"],
 }
 
+@task(name="detect_topic")
 def detect_topic(text: str) -> str:
     t = text.lower()
     for topic, kws in FEDERAL_TOPICS.items():
@@ -66,11 +68,13 @@ def detect_topic(text: str) -> str:
             return topic
     return "General Federal Inquiry"
 
+@task(name="policy_check")
 def policy_check(message: str) -> dict:
     """Very basic moderation stub for demo; extend with your real checks."""
     flagged = contains_pii(message) or any(bad in message.lower() for bad in ["bomb", "attack"])
     return {"flagged": flagged, "reason": "pii_or_disallowed" if flagged else "ok"}
 
+@task(name="retrieve_docs")
 def retrieve_docs(query: str) -> list[str]:
     """Stub: simulate retrieval latency and return fake IDs when relevant."""
     time.sleep(0.02)
@@ -96,6 +100,7 @@ PII_PATTERNS = [
     r"\b(?:\d[ -]*?){13,16}\b" # CC-like (loose)
 ]
 
+@task(name="PII_check")
 def contains_pii(text: str) -> bool:
     if not text:
         return False
@@ -216,7 +221,7 @@ HTML = """
   <body>
     <div class="wrap">
       <h1><span>Citizen Services</span> Assistant</h1>
-      <p class="subtitle">Ask benefit or eligibility questions securely — no personal data needed.</p>
+      <p class="subtitle">Ask FEDERAL benefit or eligibility questions securely — no personal data needed.</p>
       <textarea id="msg" placeholder="Type your question here..."></textarea>
       <button id="send">Ask</button>
       <pre id="out">(Your AI response will appear here.)</pre>
@@ -248,6 +253,8 @@ def home():
 # 3) Chat endpoint
 # ---------------------------
 @app.post("/chat")
+@agent(name="chat_agent")
+@workflow(name="process_citizen_request")
 def chat(req: ChatRequest, request: Request):
     user_msg = (req.message or "").strip()
 
