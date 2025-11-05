@@ -5,12 +5,13 @@ from typing import Optional
 
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 # --- Datadog / ddtrace ---
 from ddtrace import tracer, patch_all
 from ddtrace.llmobs import LLMObs
-from ddtrace.llmobs.decorators import workflow, task, agent
+from ddtrace.llmobs.decorators import workflow, task, agent, tool
 
 # --- LLM client (OpenAI) ---
 from openai import OpenAI
@@ -74,7 +75,7 @@ def policy_check(message: str) -> dict:
     flagged = contains_pii(message) or any(bad in message.lower() for bad in ["bomb", "attack"])
     return {"flagged": flagged, "reason": "pii_or_disallowed" if flagged else "ok"}
 
-@task(name="retrieve_docs")
+@tool(name="retrieve_docs")
 def retrieve_docs(query: str) -> list[str]:
     """Stub: simulate retrieval latency and return fake IDs when relevant."""
     time.sleep(0.02)
@@ -115,6 +116,8 @@ def contains_pii(text: str) -> bool:
 # ---------------------------
 app = FastAPI(title="Citizen Services Virtual Assistant")
 
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
 class ChatRequest(BaseModel):
     message: str
     session_id: Optional[str] = None
@@ -139,8 +142,8 @@ HTML = """
         padding: 0;
         color: #fff;
         background: linear-gradient(rgba(0, 20, 40, 0.85), rgba(0, 20, 40, 0.85)),
-                    url('https://images.unsplash.com/photo-1575311373936-4a39f57a4c87?auto=format&fit=crop&w=1600&q=80')
-                    no-repeat center center fixed;
+            url('/static/united-state-america-us-usa-banner.jpg')
+            no-repeat center center fixed;
         background-size: cover;
         min-height: 100vh;
         display: flex;
@@ -253,7 +256,7 @@ def home():
 # 3) Chat endpoint
 # ---------------------------
 @app.post("/chat")
-@agent(name="chat_agent")
+@agent(name="citizen_agent")
 @workflow(name="process_citizen_request")
 def chat(req: ChatRequest, request: Request):
     user_msg = (req.message or "").strip()
