@@ -249,7 +249,7 @@ export OPENAI_MODEL="gpt-4o-mini"
 export DATASET_CSV="Citizen_Eligibility_Demo_Dataset_with_Metadata.csv"  # optional
 ````
 
-### **▶️ Run the Demo**
+### **▶️ Run the Experiment**
 ```bash
 python3 citizen_assistant_experiment.py
 ````
@@ -382,7 +382,7 @@ pip install -r requirements.txt
 
 ---
 
-### 7️⃣ Run your demo script
+### 7️⃣ Run your demo experiment script
 
 Once the environment is ready:
 
@@ -483,7 +483,7 @@ It reads from an `inputs.txt` file containing example citizen-style questions an
 
 ### 🚀 Usage
 
-Run the script directly:
+Run the traffic script directly:
 
 ```bash
 ./citizen_poster.sh
