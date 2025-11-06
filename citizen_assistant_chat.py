@@ -110,6 +110,11 @@ def contains_pii(text: str) -> bool:
             return True
     return False
 
+@workflow(name="process_citizen_request")
+def process_request(text: str) -> bool:
+    if "TRIGGER_AGENT_ERROR" in text:
+        return False
+    return True
 
 # ---------------------------
 # 1) FastAPI app
@@ -251,13 +256,11 @@ HTML = """
 def home():
     return HTML
 
-
 # ---------------------------
 # 3) Chat endpoint
 # ---------------------------
 @app.post("/chat")
 @agent(name="citizen_agent")
-@workflow(name="process_citizen_request")
 def chat(req: ChatRequest, request: Request):
     user_msg = (req.message or "").strip()
 
@@ -268,6 +271,10 @@ def chat(req: ChatRequest, request: Request):
             status_code=400,
             content={"error": "Your message appears to contain PII. Please remove sensitive information and try again."},
         )
+
+    # If request is to be orchestrated, define logic in process request
+    if not process_request(user_msg):
+        raise RuntimeError("Synthetic agent failure for demo")
 
     # Root span (kept the same name so existing dashboards continue to work)
     with tracer.trace("chat.request", service="citizen-assistant", resource="/chat") as root:
@@ -310,10 +317,13 @@ def chat(req: ChatRequest, request: Request):
 
             # --- LLM call (OpenAI) ---
             with tracer.trace("citizen.llm.completion") as llm_span:
+                # --- take advantage of Hallucination detection  ---
                 llm_span.set_tag("model.name", OPENAI_MODEL)
                 llm_span.set_metric("prompt.length", len(user_msg))
                 start = time.time()
+                
                 try:
+
                     completion = openai_client.chat.completions.create(
                         model=OPENAI_MODEL,
                         messages=[
