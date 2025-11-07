@@ -90,7 +90,7 @@ Open: [http://localhost:8000](http://localhost:8000)
 ---
 You should be able to see the application using localhost and your port setting:
 
-
+[![Dashboard Screenshot](images/csa_demo_home.png)]
 
 ---
 
