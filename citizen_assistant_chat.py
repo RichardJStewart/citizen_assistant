@@ -4,7 +4,7 @@ import time
 from typing import Optional
 
 from fastapi import FastAPI, Request, HTTPException
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
@@ -123,6 +123,12 @@ app = FastAPI(title="Citizen Services Virtual Assistant")
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
+# Serve SVG favicon explicitly with correct media type
+@app.get("/favicon.ico", include_in_schema=False)
+async def favicon_redirect():
+    # Some browsers still request /favicon.ico
+    return FileResponse("static/favicon.svg", media_type="image/svg+xml")
+
 class ChatRequest(BaseModel):
     message: str
     session_id: Optional[str] = None
@@ -137,6 +143,7 @@ HTML = """
 <!doctype html>
 <html>
   <head>
+    <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
     <meta charset="utf-8" />
     <title>Citizen Services Virtual Assistant</title>
     <style>
