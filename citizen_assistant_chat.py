@@ -127,7 +127,7 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 @app.get("/favicon.ico", include_in_schema=False)
 async def favicon_redirect():
     # Some browsers still request /favicon.ico
-    return FileResponse("static/favicon.svg", media_type="image/svg+xml")
+    return FileResponse("static/favicon.png", media_type="image/png")
 
 class ChatRequest(BaseModel):
     message: str
@@ -143,7 +143,7 @@ HTML = """
 <!doctype html>
 <html>
   <head>
-    <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+    <link rel="icon" href="/static/favicon.png" type="image/png">
     <meta charset="utf-8" />
     <title>Citizen Services Virtual Assistant</title>
     <style>
