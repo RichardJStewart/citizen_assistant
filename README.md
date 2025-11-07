@@ -88,6 +88,11 @@ Open: [http://localhost:8000](http://localhost:8000)
 **Changed filenames?** Replace `citizen_assistant_chat` with your module name and keep `:app` (the FastAPI instance variable).
 
 ---
+You should be able to see the application using localhost and your port setting:
+
+
+
+---
 
 ## 🔌 Endpoints
 
